@@ -11,6 +11,11 @@
                                 [agentlang.lang.internal :as li])])})
 
 (entity
+ :ConnectionConfig
+ {:apikey :String
+  :channelid :String})
+
+(entity
  :Chat
  {:id :Identity
   :channel {:type :String :optional true}
@@ -27,10 +32,10 @@
   (cc/get-connection :Slack/Connection))
 
 (defn slack-api-key []
-  (or (:api-key (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
+  (or (:apikey (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
 
 (defn slack-channel-id []
-  (or (:channel-id (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
+  (or (:channelid (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
 
 (def slack-base-url "https://slack.com/api")
 
