@@ -12,8 +12,8 @@
 
 (entity
  :Chat
- {:channel {:type :String :guid true
-            :default (System/getenv "SLACK_CHANNEL_ID")}
+ {:id :Identity
+  :channel {:type :String :optional true}
   :text :String
   :mrkdwn {:type :Boolean :default true}
   :thread {:type :String :optional true}})
@@ -24,10 +24,13 @@
   :text {:type :String :read-only true}})
 
 (defn slack-connection []
-  (cc/get-connection :Slack/Connection))
+  (u/trace "@@##### " (cc/get-connection :Slack/Connection)))
 
 (defn slack-api-key []
-  (or (cc/connection-parameter (slack-connection)) (System/getenv "SLACK_API_KEY")))
+  (or (:api-key (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
+
+(defn slack-channel-id []
+  (or (:channel-id (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
 
 (def slack-base-url "https://slack.com/api")
 
@@ -78,7 +81,7 @@
 
 (defn- create-response [instance]
   (let [chat (:chat instance)
-        r (wait-for-reply (:channel chat) (:thread chat))]
+        r (wait-for-reply (or (:channel chat) (slack-channel-id)) (:thread chat))]
     (assoc instance :text r)))
 
 (defn create-entity [instance]
