@@ -1,5 +1,5 @@
 {:name :Slack
- :agentlang-version "0.6.2-alpha"
+ :agentlang-version "current"
  :components [:Slack.Core]
  :channel {:tools [:Slack.Core/Chat :Slack.Core/ManagerSlackChannel]}
  :connection-types
