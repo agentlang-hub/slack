@@ -24,7 +24,7 @@
   :text {:type :String :read-only true}})
 
 (defn slack-connection []
-  (u/trace "@@##### " (cc/get-connection :Slack/Connection)))
+  (cc/get-connection :Slack/Connection))
 
 (defn slack-api-key []
   (or (:api-key (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
@@ -74,7 +74,7 @@
     r))
 
 (defn- create-chat [api-name instance]
-  (let [data (dissoc instance :-*-type-*- :type-*-tag-*- :thread)
+  (let [data (dissoc instance :-*-type-*- :type-*-tag-*- :thread :id)
         url (get-url (str "/" api-name))
         response (http/do-post url (http-opts) data)]
     (handle-response response instance)))
@@ -87,7 +87,11 @@
 (defn create-entity [instance]
   (let [[c n] (li/split-path (cn/instance-type instance))]
     (case n
-      :Chat (create-chat "chat.postMessage" instance)
+      :Chat (create-chat
+             "chat.postMessage"
+             (if (:channel instance)
+               instance
+               (assoc instance :channel (slack-channel-id))))
       :Response (create-response instance)
       instance)))
 
