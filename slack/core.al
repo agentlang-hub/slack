@@ -29,7 +29,7 @@
   :text {:type :String :read-only true}})
 
 (defn slack-connection []
-  (cc/get-connection :Slack/Connection))
+  (cc/open-connection :Slack/Connection))
 
 (defn slack-api-key []
   (or (:apikey (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
