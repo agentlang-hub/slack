@@ -1,14 +1,13 @@
 (component
  :Slack.Core
- {:clj-import (quote [(:require [clojure.string :as s]
-                                [agentlang.component :as cn]
-                                [agentlang.util :as u]
-                                [agentlang.util.http :as http]
-                                [agentlang.util.logger :as log]
-                                [agentlang.datafmt.json :as json]
-                                [agentlang.evaluator :as ev]
-                                [agentlang.connections.client :as cc]
-                                [agentlang.lang.internal :as li])])})
+ {:clj-import [(:require [clojure.string :as s]
+                         [agentlang.component :as cn]
+                         [agentlang.util :as u]
+                         [agentlang.util.http :as http]
+                         [agentlang.util.logger :as log]
+                         [agentlang.datafmt.json :as json]
+                         [agentlang.connections.client :as cc]
+                         [agentlang.lang.internal :as li])]})
 
 (entity
  :ConnectionConfig
@@ -35,7 +34,7 @@
   (or (:apikey (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
 
 (defn slack-channel-id []
-  (or (:channelid (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_API_KEY")))
+  (or (:channelid (cc/connection-parameter (slack-connection))) (System/getenv "SLACK_CHANNEL_ID")))
 
 (def slack-base-url "https://slack.com/api")
 
