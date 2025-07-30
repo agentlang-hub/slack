@@ -36,14 +36,20 @@ async function waitForReply(thread) {
     }
 }
 
-export async function send(channel, message) {
+export async function send(channel, message, env) {
     const apiUrl = getUrl("chat.postMessage")
+    const suspId = env.suspend()
     const r = await handleFetch(apiUrl, {
         method: 'POST',
         headers: StandardHeaders,
 	body: JSON.stringify({channel: SlackChannelId,
-			      text: message,
+			      text: `${suspId} -- ${message}`,
 			      mrkdwn: true})
     });
-    return await waitForReply(r.ts)
+    return r.ts
+}
+
+export async function receive(threadId) {
+	const response = await waitForReply(threadId)
+	return response
 }
