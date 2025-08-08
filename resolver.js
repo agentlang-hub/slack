@@ -54,16 +54,14 @@ const AL_HOST = process.env['AL_HOST'] || 'http://localhost:8080'
 
 export async function send(channel, message, env) {
     const apiUrl = getUrl("chat.postMessage")
-    const suspId = env.suspend()
+    //const suspId = env.suspend()
     const r = await handleFetch(apiUrl, {
         method: 'POST',
         headers: StandardHeaders(),
         body: JSON.stringify({
             channel: getChannel(),
             markdown_text: `${message}
-            <${AL_HOST}/agentlang/activeSuspension/${suspId}:approve|Approve>
-            <${AL_HOST}/agentlang/activeSuspension/${suspId}:reject|Reject>
-            `,
+Please reply to either *approve* or *reject* this request`,
             mrkdwn: true
         })
     });
