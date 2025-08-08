@@ -1,14 +1,26 @@
-const SlackApiKey = process.env['SLACK_API_KEY']
-const SlackChannelId = process.env['SLACK_CHANNEL_ID']
+let al_integmanager
+import(`${process.cwd()}/node_modules/agentlang/out/runtime/integrations.js`).then((r) => {
+    al_integmanager = r
+})
+
+function getApiKey() {
+    return al_integmanager.getIntegrationConfig('slack', 'apiKey')
+}
+
+function getChannel() {
+    return al_integmanager.getIntegrationConfig('slack', 'channel')
+}
+
 const SlackBaseUrl = "https://slack.com/api"
 
 function getUrl(endpoint) {
     return SlackBaseUrl + "/" + endpoint
 }
 
-const StandardHeaders = {
-    "Authorization": "Bearer " + SlackApiKey,
-    "Content-Type": "application/json"
+function StandardHeaders() {
+    return {"Authorization": "Bearer " + getApiKey(),
+	    "Content-Type": "application/json"
+	   }
 }
 
 async function handleFetch(url, req) {
@@ -24,11 +36,11 @@ async function handleFetch(url, req) {
 }
 
 async function waitForReply(thread) {
-    const apiUrl = getUrl("conversations.replies?ts=" + thread + "&channel=" + SlackChannelId)
+    const apiUrl = getUrl("conversations.replies?ts=" + thread + "&channel=" + getChannel())
     await new Promise(resolve => setTimeout(resolve, 10000))
     const resp = await handleFetch(apiUrl, {
         method: 'GET',
-        headers: StandardHeaders
+        headers: StandardHeaders()
     });
     const msgs = resp['messages']
     if (msgs.length >= 2) {
@@ -45,9 +57,9 @@ export async function send(channel, message, env) {
     const suspId = env.suspend()
     const r = await handleFetch(apiUrl, {
         method: 'POST',
-        headers: StandardHeaders,
+        headers: StandardHeaders(),
         body: JSON.stringify({
-            channel: SlackChannelId,
+            channel: getChannel(),
             markdown_text: `${message}
             <${AL_HOST}/agentlang/activeSuspension/${suspId}:approve|Approve>
             <${AL_HOST}/agentlang/activeSuspension/${suspId}:reject|Reject>
