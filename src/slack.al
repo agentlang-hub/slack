@@ -1,6 +1,6 @@
 module slack
 
-import "src/resolver.js" @as slack
+import "resolver.js" @as slack
 
 record channel {
     channel String
