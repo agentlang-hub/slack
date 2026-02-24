@@ -1,14 +1,19 @@
-let al_integmanager
-import(`${process.cwd()}/node_modules/agentlang/out/runtime/integrations.js`).then((r) => {
-    al_integmanager = r
-})
+const INTEG_MANAGER_HOST = process.env.INTEG_MANAGER_HOST || 'http://localhost:8085'
+const SLACK_CHANNEL = process.env.SLACK_CHANNEL
 
-function getApiKey() {
-    return al_integmanager.getIntegrationConfig('slack', 'apiKey')
+async function fetchAuthHeaders() {
+    const resp = await fetch(
+        `${INTEG_MANAGER_HOST}/integmanager.auth/authHeaders?integrationName=slack`
+    )
+    if (!resp.ok) {
+        throw new Error(`Failed to get auth headers for slack: ${resp.status}`)
+    }
+    const data = await resp.json()
+    return data.headers
 }
 
 function getChannel() {
-    return al_integmanager.getIntegrationConfig('slack', 'channel')
+    return SLACK_CHANNEL
 }
 
 const SlackBaseUrl = "https://slack.com/api"
@@ -17,10 +22,9 @@ function getUrl(endpoint) {
     return SlackBaseUrl + "/" + endpoint
 }
 
-function StandardHeaders() {
-    return {"Authorization": "Bearer " + getApiKey(),
-	    "Content-Type": "application/json"
-	   }
+async function StandardHeaders() {
+    const authHeaders = await fetchAuthHeaders()
+    return { ...authHeaders, "Content-Type": "application/json" }
 }
 
 async function handleFetch(url, req) {
@@ -40,7 +44,7 @@ async function waitForReply(thread) {
     await new Promise(resolve => setTimeout(resolve, 10000))
     const resp = await handleFetch(apiUrl, {
         method: 'GET',
-        headers: StandardHeaders()
+        headers: await StandardHeaders()
     });
     const msgs = resp['messages']
     if (msgs.length >= 2) {
@@ -57,7 +61,7 @@ export async function send(channel, message, env) {
     const suspId = env.suspend()
     const r = await handleFetch(apiUrl, {
         method: 'POST',
-        headers: StandardHeaders(),
+        headers: await StandardHeaders(),
         body: JSON.stringify({
             channel: getChannel(),
             markdown_text: `${message}
